@@ -45,7 +45,7 @@ Emunah Companion is a mobile app designed to help users strengthen their faith (
 | Feature                | Description                                         |
 | ---------------------- | --------------------------------------------------- |
 | **REST API**           | Versioned endpoints for all app + admin operations   |
-| **Auth**               | TBD – authentication strategy (to be decided)       |
+| **Auth**               | JWT-based authentication (register, login, refresh)        |
 | **Content Delivery**   | Serve content with language negotiation              |
 | **File Upload**        | Handle media uploads to GCS                          |
 
@@ -71,11 +71,16 @@ Emunah Companion is a mobile app designed to help users strengthen their faith (
 
 ---
 
+## Resolved Decisions
+
+| # | Question                                   | Decision              |
+|---| ------------------------------------------ | --------------------- |
+| 1 | Authentication strategy                    | ✅ Standalone JWT       |
+| 2 | Journal privacy model                      | ✅ AES-256 encryption   |
+
 ## Open Decisions
 
 | # | Question                                   | Status   |
 |---| ------------------------------------------ | -------- |
-| 1 | Authentication strategy (JWT? Firebase?)   | ❓ Open   |
-| 2 | Push notification provider                 | ❓ Open   |
-| 3 | Exact home screen layout/design            | ❓ Open   |
-| 4 | Journal privacy model (encrypted? plain?)  | ❓ Open   |
+| 1 | Push notification provider                 | ❓ Open   |
+| 2 | Exact home screen layout/design            | ❓ Open   |

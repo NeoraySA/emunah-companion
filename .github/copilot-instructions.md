@@ -46,8 +46,11 @@
 | Mobile App      | React Native + Expo (iOS + Android) |
 | Admin Web       | Next.js (React)                     |
 | Backend API     | Node.js + Express                   |
-| Database        | MySQL (Google Cloud SQL – existing instance, new schema) |
+| Database        | MySQL 8.0 (Google Cloud SQL – instance: `cartech-mysql`, project: `cartech-v1`) |
 | Cloud Storage   | Google Cloud Storage (GCS)          |
+| ORM             | Prisma                              |
+| Auth            | Standalone JWT + bcrypt             |
+| Monorepo        | npm workspaces + Turborepo          |
 | Language        | TypeScript everywhere               |
 
 ---

@@ -53,8 +53,8 @@ cloud-sql-proxy <INSTANCE_CONNECTION_NAME> &
 
 ```bash
 cd database
-npm run migrate      # TBD – exact command depends on migration tool
-npm run seed         # Populate with default data
+npx prisma migrate dev     # Apply migrations
+npx prisma db seed          # Populate with default data
 ```
 
 ---
@@ -170,11 +170,16 @@ emunah-companion/
 
 ---
 
+## Resolved Decisions
+
+| # | Question                                   | Decision              |
+|---|--------------------------------------------|---------------------- |
+| 1 | Monorepo tool                              | ✅ npm workspaces + Turborepo |
+| 3 | Pre-commit hook tool                       | ✅ Husky + lint-staged  |
+
 ## Open Questions
 
 | # | Question                                   | Status   |
 |---|--------------------------------------------|----------|
-| 1 | Monorepo tool? (npm workspaces / Turborepo)| ❓ Open   |
-| 2 | CI/CD platform (GitHub Actions, Cloud Build)| ❓ Open  |
-| 3 | Pre-commit hook tool (Husky, lint-staged)  | ❓ Open   |
-| 4 | Docker for local dev?                      | ❓ Open   |
+| 1 | CI/CD platform (GitHub Actions, Cloud Build)| ❓ Open  |
+| 2 | Docker for local dev?                      | ❓ Open   |

@@ -97,13 +97,18 @@ journal_entries
 ├── id              INT PK AUTO_INCREMENT
 ├── user_id         INT FK → users.id
 ├── scenario_id     INT FK → scenarios.id NULL
-├── title           VARCHAR(255) NULL
-├── body            TEXT
+├── title_encrypted BLOB NULL               -- AES-256 encrypted
+├── body_encrypted  BLOB NOT NULL            -- AES-256 encrypted
+├── encryption_iv   VARCHAR(32) NOT NULL     -- initialization vector
 ├── mood            VARCHAR(50) NULL
 ├── created_at      TIMESTAMP
 ├── updated_at      TIMESTAMP
 └── deleted_at      TIMESTAMP NULL
 ```
+
+> **Encryption**: Journal entries are encrypted at the application level using AES-256-CBC.
+> Each entry has its own IV. The encryption key is derived from a server-side secret (env variable).
+> This ensures journal content remains private even if the database is compromised.
 
 ### Anchors (Reminders)
 
@@ -126,15 +131,54 @@ anchors
 ```sql
 users
 ├── id              INT PK AUTO_INCREMENT
-├── external_id     VARCHAR(255) UNIQUE NULL  -- from auth provider
-├── email           VARCHAR(255) UNIQUE NULL
+├── email           VARCHAR(255) UNIQUE NOT NULL
+├── password_hash   VARCHAR(255) NOT NULL    -- bcrypt hashed
 ├── display_name    VARCHAR(255) NULL
 ├── preferred_lang  VARCHAR(10) DEFAULT 'he'
+├── role_id         INT FK → roles.id
 ├── is_active       BOOLEAN DEFAULT TRUE
+├── last_login_at   TIMESTAMP NULL
 ├── created_at      TIMESTAMP
 ├── updated_at      TIMESTAMP
 └── deleted_at      TIMESTAMP NULL
 ```
+
+### Roles & Permissions
+
+```sql
+roles
+├── id              INT PK AUTO_INCREMENT
+├── name            VARCHAR(50) UNIQUE   -- 'admin', 'editor', 'user'
+├── description     VARCHAR(255) NULL
+├── created_at      TIMESTAMP
+└── updated_at      TIMESTAMP
+```
+
+```sql
+permissions
+├── id              INT PK AUTO_INCREMENT
+├── key             VARCHAR(100) UNIQUE  -- 'scenarios.create', 'translations.edit'
+├── description     VARCHAR(255) NULL
+├── created_at      TIMESTAMP
+└── updated_at      TIMESTAMP
+```
+
+```sql
+role_permissions
+├── id              INT PK AUTO_INCREMENT
+├── role_id         INT FK → roles.id
+├── permission_id   INT FK → permissions.id
+├── created_at      TIMESTAMP
+└── UNIQUE (role_id, permission_id)
+```
+
+**Default Roles:**
+
+| Role     | Permissions                                                                 |
+| -------- | --------------------------------------------------------------------------- |
+| `admin`  | Full access: scenarios, translations, media, users, settings                |
+| `editor` | Content only: scenarios CRUD, translations edit, media upload               |
+| `user`   | App only: read content, journal CRUD, anchors CRUD, profile edit            |
 
 ### Media Assets
 
@@ -158,7 +202,9 @@ media_assets
 ## Relationships Diagram (simplified)
 
 ```
-users ─────┬──── journal_entries
+roles ──────── permissions (via role_permissions)
+  │
+users ─────┬──── journal_entries (encrypted)
            └──── anchors
 
 scenarios ──┬──── scenario_steps
@@ -188,18 +234,25 @@ languages ──────── translations
 
 ## Migration Strategy
 
-- Migrations will be managed via a tool (TBD: Knex, Prisma, or raw SQL files).
-- All migrations live in `database/migrations/`.
-- Seed data (default languages, sample content) in `database/seeds/`.
-- Every migration must be reversible (up + down).
+- Migrations managed via **Prisma Migrate**.
+- Schema defined in `database/prisma/schema.prisma`.
+- Seed data (default languages, roles, permissions, sample content) via `prisma db seed`.
+- Every migration is versioned and tracked in `database/prisma/migrations/`.
 
 ---
+
+## Resolved Decisions
+
+| # | Question                                             | Decision              |
+|---|------------------------------------------------------|-----------------------|
+| 1 | Auth provider                                        | ✅ Standalone JWT + bcrypt |
+| 2 | Journal encryption                                   | ✅ AES-256-CBC at app level |
+| 3 | Roles/permissions table for admin                     | ✅ Yes: admin, editor, user |
+| 4 | ORM/migration tool                                   | ✅ Prisma               |
 
 ## Open Questions
 
 | # | Question                                             | Status   |
 |---|------------------------------------------------------|----------|
-| 1 | Auth provider → impacts `users` table design         | ❓ Open   |
-| 2 | Should journal entries be encrypted at rest?          | ❓ Open   |
-| 3 | Do we need a `roles` / `permissions` table for admin? | ❓ Open   |
-| 4 | Which ORM/migration tool to use?                     | ❓ Open   |
+| 1 | Refresh token strategy (rotation? expiry?)           | ❓ Open   |
+| 2 | Per-user encryption key or shared server key?        | ❓ Open   |

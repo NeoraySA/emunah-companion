@@ -154,7 +154,7 @@ Example: audio/scenarios/a1b2c3d4-e5f6-7890-abcd-ef1234567890.mp3
 
 ```bash
 # GCS Configuration
-GCS_PROJECT_ID=your-gcp-project-id
+GCS_PROJECT_ID=cartech-v1
 GCS_MEDIA_BUCKET=emunah-companion-media
 GCS_EXPORTS_BUCKET=emunah-companion-exports
 GCS_BACKUPS_BUCKET=emunah-companion-backups

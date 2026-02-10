@@ -39,8 +39,8 @@
 | Framework      | React Native + Expo (managed workflow)        |
 | Language       | TypeScript                                    |
 | Navigation     | React Navigation                              |
-| State          | TBD (React Context / Zustand / Redux Toolkit) |
-| API Client     | Axios or fetch wrapper                        |
+| State          | Zustand (lightweight, TS-friendly)             |
+| API Client     | Axios with typed wrapper                      |
 | i18n           | Dynamic from API, local cache                 |
 
 ### 2. Admin Web (`apps/admin/`)
@@ -49,9 +49,9 @@
 | -------------- | -------------------------------------- |
 | Framework      | Next.js (App Router)                   |
 | Language       | TypeScript                             |
-| UI Library     | TBD (Tailwind CSS, shadcn/ui, MUI)    |
-| Auth           | TBD                                    |
-| API Client     | Fetch / SWR / React Query             |
+| UI Library     | Tailwind CSS + shadcn/ui               |
+| Auth           | JWT (standalone)                       |
+| API Client     | React Query (TanStack Query)           |
 
 ### 3. Backend API (`server/`)
 
@@ -60,9 +60,9 @@
 | Runtime        | Node.js (LTS)                                    |
 | Framework      | Express.js                                       |
 | Language       | TypeScript                                       |
-| ORM / Query    | TBD (Knex.js, Prisma, TypeORM)                   |
-| Validation     | Zod or Joi                                       |
-| Auth           | TBD                                               |
+| ORM / Query    | Prisma (type-safe, auto-generated types)          |
+| Validation     | Zod                                               |
+| Auth           | JWT (standalone, bcrypt for passwords)             |
 | File handling  | Multer → GCS upload                              |
 | API versioning | URL prefix: `/api/v1/`                           |
 
@@ -70,10 +70,10 @@
 
 | Aspect         | Detail                                           |
 | -------------- | ------------------------------------------------ |
-| Engine         | MySQL 8.x                                        |
-| Hosting        | Google Cloud SQL (existing instance)             |
-| Schema         | New database on existing instance                |
-| Migrations     | TBD (Knex migrations, Prisma Migrate, raw SQL)   |
+| Engine         | MySQL 8.0                                        |
+| Hosting        | Google Cloud SQL (instance: `cartech-mysql`, region: `me-west1-b`) |
+| Schema         | New database `emunah_companion` on existing instance |
+| Migrations     | Prisma Migrate                                    |
 | Naming         | snake_case tables and columns                    |
 
 ### 5. Cloud Storage (`infra/`)
@@ -96,12 +96,12 @@
 
 ## Communication Patterns
 
-| Path                   | Protocol     | Auth              |
-| ---------------------- | ------------ | ----------------- |
-| Mobile → Backend       | HTTPS / REST | Bearer token (TBD)|
-| Admin → Backend        | HTTPS / REST | Bearer token (TBD)|
-| Backend → Cloud SQL    | TCP (MySQL)  | IAM / password    |
-| Backend → GCS          | HTTPS (SDK)  | Service account   |
+| Path                   | Protocol     | Auth                    |
+| ---------------------- | ------------ | ----------------------- |
+| Mobile → Backend       | HTTPS / REST | Bearer JWT token        |
+| Admin → Backend        | HTTPS / REST | Bearer JWT token        |
+| Backend → Cloud SQL    | TCP (MySQL)  | IAM / password          |
+| Backend → GCS          | HTTPS (SDK)  | Service account         |
 
 ---
 
@@ -117,13 +117,14 @@
 
 ---
 
-## Open Architecture Decisions
+## Architecture Decisions
 
-| #  | Decision                            | Status    |
-| -- | ----------------------------------- | --------- |
-| 1  | State management library (mobile)   | ❓ Open    |
-| 2  | ORM / query builder                 | ❓ Open    |
-| 3  | Admin UI component library          | ❓ Open    |
-| 4  | Auth strategy (JWT, Firebase, etc.) | ❓ Open    |
-| 5  | Backend hosting platform            | ❓ Open    |
-| 6  | Caching layer (Redis?)              | ❓ Open    |
+| #  | Decision                            | Status       | Choice                      |
+| -- | ----------------------------------- | ------------ | --------------------------- |
+| 1  | State management library (mobile)   | ✅ Decided    | Zustand                     |
+| 2  | ORM / query builder                 | ✅ Decided    | Prisma                      |
+| 3  | Admin UI component library          | ✅ Decided    | Tailwind CSS + shadcn/ui    |
+| 4  | Auth strategy                       | ✅ Decided    | Standalone JWT + bcrypt     |
+| 5  | Backend hosting platform            | ❓ Open       |                             |
+| 6  | Caching layer (Redis?)              | ❓ Open       |                             |
+| 7  | Monorepo tooling                    | ✅ Decided    | npm workspaces + Turborepo  |

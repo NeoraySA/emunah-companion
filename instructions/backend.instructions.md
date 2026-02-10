@@ -22,8 +22,9 @@
 - **Runtime**: Node.js (20 LTS+)
 - **Framework**: Express.js
 - **Language**: TypeScript (strict mode)
-- **ORM/Query Builder**: TBD (Knex.js / Prisma / TypeORM)
-- **Validation**: Zod or Joi
+- **ORM/Query Builder**: Prisma (type-safe, auto-generated types)
+- **Validation**: Zod
+- **Auth**: JWT (access + refresh tokens), bcrypt for passwords
 - **File Handling**: Multer (memory storage) → GCS upload
 - **Testing**: Jest + Supertest
 

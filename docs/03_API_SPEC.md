@@ -11,7 +11,7 @@
 | --------------- | ------------------------------------------------------------- |
 | Base URL        | `/api/v1`                                                     |
 | Format          | JSON (request & response)                                     |
-| Auth            | TBD – Bearer token in `Authorization` header                  |
+| Auth            | JWT – Bearer token in `Authorization` header      |
 | Language        | `Accept-Language` header (`he`, `en`) for content negotiation |
 | Pagination      | `?page=1&limit=20` → response includes `meta.totalPages`     |
 | Sorting         | `?sort=created_at&order=desc`                                 |
@@ -62,6 +62,18 @@
 | Method | Path              | Description         | Auth  |
 | ------ | ----------------- | ------------------- | ----- |
 | GET    | `/api/v1/health`  | Health check        | None  |
+
+---
+
+### Auth
+
+| Method | Path                        | Description                     | Auth   |
+| ------ | --------------------------- | ------------------------------- | ------ |
+| POST   | `/api/v1/auth/register`     | Register new user               | None   |
+| POST   | `/api/v1/auth/login`        | Login, returns JWT tokens       | None   |
+| POST   | `/api/v1/auth/refresh`      | Refresh access token            | Refresh token |
+| POST   | `/api/v1/auth/logout`       | Invalidate refresh token        | User   |
+| POST   | `/api/v1/auth/change-password` | Change password              | User   |
 
 ---
 
@@ -157,11 +169,16 @@
 
 ---
 
+## Resolved Decisions
+
+| # | Question                                          | Decision              |
+|---|---------------------------------------------------|-----------------------|
+| 1 | Auth flow                                         | ✅ JWT register/login/refresh/logout |
+| 2 | Translations in entity GETs                       | ❓ Open (TBD during impl) |
+
 ## Open Questions
 
 | # | Question                                          | Status   |
 |---|---------------------------------------------------|----------|
-| 1 | Auth flow: login/register endpoints?              | ❓ Open   |
-| 2 | Should translations be embedded in entity GETs?   | ❓ Open   |
-| 3 | Rate limiting strategy                            | ❓ Open   |
-| 4 | Webhook/event endpoints for admin?                | ❓ Open   |
+| 1 | Rate limiting strategy                            | ❓ Open   |
+| 2 | Webhook/event endpoints for admin?                | ❓ Open   |
