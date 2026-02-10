@@ -85,4 +85,32 @@
 
 ---
 
+### 2026-02-10 – Expo Mobile App Initialization
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Initialized full Expo SDK 52 project with expo-router (file-based routing). Created 5-tab navigation layout (Home, Scenarios, Journal, Anchors, Settings) with Hebrew RTL placeholders. Set up service layer (Axios + JWT interceptors), Zustand auth store, React Query provider, and reusable components.
+- **Tech choices**:
+  - Expo SDK 52, React Native 0.76.6
+  - expo-router v4 (file-based routing with typed routes)
+  - @tanstack/react-query v5 (data fetching & caching)
+  - Zustand v5 (client state management)
+  - expo-secure-store (token storage)
+  - expo-localization (i18n support)
+- **Files created**:
+  - Config: `app.json`, `package.json`, `tsconfig.json`, `babel.config.js`, `.gitignore`, `.env.example`
+  - Routing: `app/_layout.tsx`, `app/(tabs)/_layout.tsx`
+  - Screens: `app/(tabs)/index.tsx`, `scenarios.tsx`, `journal.tsx`, `anchors.tsx`, `settings.tsx`
+  - Services: `services/api-client.ts`, `services/api-helpers.ts`, `services/index.ts`
+  - Store: `store/auth-store.ts`, `store/index.ts`
+  - Hooks: `hooks/use-auth.ts`, `hooks/index.ts`
+  - Constants: `constants/config.ts`, `constants/index.ts`
+  - Utils: `utils/helpers.ts`, `utils/index.ts`
+  - Components: `components/LoadingScreen.tsx`, `components/ErrorScreen.tsx`, `components/index.ts`
+  - Assets: `assets/images/README.md` (placeholder)
+- **Verification**: TypeScript compiles with zero errors (`tsc --noEmit`)
+- **Open items**: Initialize Next.js admin panel, implement Auth feature
+
+---
+
 _Will be populated as tasks are planned and approved._
