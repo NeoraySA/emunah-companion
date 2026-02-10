@@ -65,4 +65,24 @@
 
 ---
 
+### 2026-02-10 – Database Setup on Cloud SQL
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Created `emunah_companion` database on Cloud SQL instance `cartech-mysql` (GCP project `cartech-v1`). Created DB user `emunah_app`. Added current dev IP to authorized networks. Ran Prisma initial migration (`20260210170243_init`) – all 11 tables created. Ran seed script: 2 languages (he, en), 3 roles (admin, editor, user), 16 permissions, and role-permission assignments.
+- **Infrastructure**:
+  - Cloud SQL instance: `cartech-mysql` (region: `me-west1-b`)
+  - Database: `emunah_companion` (charset: utf8mb4, collation: utf8mb4_unicode_ci)
+  - DB user: `emunah_app`
+  - Public IP: `34.165.163.235`
+- **Files created/changed**:
+  - `database/.env` (local only, gitignored)
+  - `database/prisma/migrations/20260210170243_init/migration.sql`
+  - `database/prisma/migrations/migration_lock.toml`
+- **Tables created**: `languages`, `roles`, `permissions`, `role_permissions`, `users`, `refresh_tokens`, `home_buttons`, `scenarios`, `scenario_steps`, `translations`, `journal_entries`, `anchors`, `media_assets`
+- **Seed data**: 2 languages, 3 roles, 16 permissions, 30 role-permission mappings
+- **Open items**: Initialize Expo mobile app, initialize Next.js admin panel
+
+---
+
 _Will be populated as tasks are planned and approved._
