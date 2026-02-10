@@ -1,0 +1,36 @@
+# CODEOWNERS – Emunah Companion
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# These owners will be requested for review when someone opens a PR
+# that modifies code in the corresponding paths.
+#
+# Format: <pattern> <owner1> <owner2> ...
+
+# Global – all files
+# * @your-github-username
+
+# Documentation
+# docs/ @your-github-username
+# instructions/ @your-github-username
+# CONTRIBUTING.md @your-github-username
+
+# Backend
+# server/ @your-github-username
+
+# Mobile App
+# apps/mobile/ @your-github-username
+
+# Admin Web
+# apps/admin/ @your-github-username
+
+# Database
+# database/ @your-github-username
+
+# Infrastructure
+# infra/ @your-github-username
+
+# GitHub config
+# .github/ @your-github-username
+
+# NOTE: Uncomment the lines above and replace @your-github-username
+# with actual GitHub usernames/teams when the remote repository is set up.
