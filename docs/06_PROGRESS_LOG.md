@@ -48,4 +48,21 @@
 
 ## Upcoming Tasks
 
+### 2026-02-10 – Monorepo Structure Setup
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Set up full monorepo structure with npm workspaces + Turborepo. Created server scaffolding (Express + health endpoint), Prisma schema with all tables, shared types package, and placeholder apps.
+- **Files created**:
+  - Root: `package.json`, `turbo.json`, `tsconfig.base.json`, `.prettierrc`, `.eslintrc.cjs`, `.prettierignore`, `.husky/pre-commit`, `README.md`
+  - `packages/shared/` – `package.json`, `tsconfig.json`, `src/index.ts` (all shared types + constants)
+  - `server/` – `package.json`, `tsconfig.json`, `.env.example`, `jest.config.js`, `src/` (app, config, routes, middleware), `tests/`
+  - `database/` – `package.json`, `tsconfig.json`, `prisma/schema.prisma` (full schema), `prisma/seed.ts`
+  - `apps/mobile/` – placeholder `package.json`, `README.md`
+  - `apps/admin/` – placeholder `package.json`, `README.md`
+  - `scripts/README.md`, `infra/README.md`, `infra/gcs/`, `infra/cloud-sql/`
+- **Open items**: Create `emunah_companion` DB on Cloud SQL, initialize Expo + Next.js in feature branches
+
+---
+
 _Will be populated as tasks are planned and approved._
