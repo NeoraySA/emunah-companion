@@ -1,0 +1,30 @@
+{
+  "name": "@emunah/database",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Emunah Companion – Database schema, migrations, and seeds (Prisma)",
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:reset": "prisma migrate reset",
+    "seed": "ts-node prisma/seed.ts",
+    "studio": "prisma studio",
+    "build": "echo \"No build step for database\" && exit 0",
+    "lint": "echo \"No lint for database\" && exit 0",
+    "test": "echo \"No tests yet\" && exit 0",
+    "typecheck": "echo \"No typecheck for database\" && exit 0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.10.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.4.0"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma",
+    "seed": "ts-node prisma/seed.ts"
+  }
+}

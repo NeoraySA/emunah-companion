@@ -1,0 +1,258 @@
+// ============================================
+// Emunah Companion – Prisma Schema
+// ============================================
+// Source of truth for the database schema.
+// See docs/02_DATA_MODEL.md for full documentation.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ----- Languages -----
+
+model Language {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @db.VarChar(10)
+  name      String   @db.VarChar(50)
+  isDefault Boolean  @default(false) @map("is_default")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  translations Translation[]
+
+  @@map("languages")
+}
+
+// ----- Roles & Permissions -----
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(50)
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(100)
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           Int      @id @default(autoincrement())
+  roleId       Int      @map("role_id")
+  permissionId Int      @map("permission_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ----- Users -----
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String    @map("password_hash") @db.VarChar(255)
+  displayName   String?   @map("display_name") @db.VarChar(255)
+  preferredLang String    @default("he") @map("preferred_lang") @db.VarChar(10)
+  roleId        Int       @map("role_id")
+  isActive      Boolean   @default(true) @map("is_active")
+  lastLoginAt   DateTime? @map("last_login_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  role           Role           @relation(fields: [roleId], references: [id])
+  journalEntries JournalEntry[]
+  anchors        Anchor[]
+  mediaAssets    MediaAsset[]
+  refreshTokens  RefreshToken[]
+
+  @@map("users")
+}
+
+// ----- Refresh Tokens -----
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  token     String   @unique @db.VarChar(500)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ----- Home Buttons -----
+
+model HomeButton {
+  id        Int       @id @default(autoincrement())
+  key       String    @unique @db.VarChar(100)
+  icon      String    @db.VarChar(255)
+  route     String    @db.VarChar(255)
+  sortOrder Int       @default(0) @map("sort_order")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([sortOrder])
+  @@map("home_buttons")
+}
+
+// ----- Scenarios -----
+
+model Scenario {
+  id        Int       @id @default(autoincrement())
+  key       String    @unique @db.VarChar(100)
+  category  String    @db.VarChar(100)
+  sortOrder Int       @default(0) @map("sort_order")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  steps          ScenarioStep[]
+  journalEntries JournalEntry[]
+
+  @@map("scenarios")
+}
+
+// ----- Scenario Steps -----
+
+model ScenarioStep {
+  id         Int       @id @default(autoincrement())
+  scenarioId Int       @map("scenario_id")
+  stepNumber Int       @map("step_number")
+  stepType   StepType  @default(text) @map("step_type")
+  configJson Json?     @map("config_json")
+  sortOrder  Int       @default(0) @map("sort_order")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@unique([scenarioId, stepNumber])
+  @@map("scenario_steps")
+}
+
+enum StepType {
+  text
+  prompt
+  action
+  summary
+}
+
+// ----- Translations (polymorphic) -----
+
+model Translation {
+  id         Int      @id @default(autoincrement())
+  entityType String   @map("entity_type") @db.VarChar(50)
+  entityId   Int      @map("entity_id")
+  languageId Int      @map("language_id")
+  fieldName  String   @map("field_name") @db.VarChar(100)
+  value      String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  language Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  @@unique([entityType, entityId, languageId, fieldName])
+  @@index([entityType, entityId])
+  @@map("translations")
+}
+
+// ----- Journal Entries (encrypted) -----
+
+model JournalEntry {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  scenarioId     Int?      @map("scenario_id")
+  titleEncrypted Bytes?    @map("title_encrypted")
+  bodyEncrypted  Bytes     @map("body_encrypted")
+  encryptionIv   String    @map("encryption_iv") @db.VarChar(32)
+  mood           String?   @db.VarChar(50)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario Scenario? @relation(fields: [scenarioId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@map("journal_entries")
+}
+
+// ----- Anchors (Reminders) -----
+
+model Anchor {
+  id             Int          @id @default(autoincrement())
+  userId         Int          @map("user_id")
+  title          String       @db.VarChar(255)
+  body           String?      @db.Text
+  scheduleType   ScheduleType @default(once) @map("schedule_type")
+  scheduleConfig Json?        @map("schedule_config")
+  isActive       Boolean      @default(true) @map("is_active")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  deletedAt      DateTime?    @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@map("anchors")
+}
+
+enum ScheduleType {
+  once
+  daily
+  weekly
+  custom
+}
+
+// ----- Media Assets -----
+
+model MediaAsset {
+  id         Int       @id @default(autoincrement())
+  filename   String    @db.VarChar(255)
+  mimeType   String    @map("mime_type") @db.VarChar(100)
+  gcsPath    String    @map("gcs_path") @db.VarChar(500)
+  sizeBytes  BigInt?   @map("size_bytes")
+  uploadedBy Int?      @map("uploaded_by")
+  entityType String?   @map("entity_type") @db.VarChar(50)
+  entityId   Int?      @map("entity_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  uploader User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@map("media_assets")
+}

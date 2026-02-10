@@ -1,0 +1,51 @@
+{
+  "name": "emunah-companion",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Emunah Companion – Faith & Bittachon mobile app, admin CMS, and backend API",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "server",
+    "database"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "dev:admin": "npm run dev -w @emunah/admin",
+    "dev:mobile": "npm run dev -w @emunah/mobile",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "typecheck": "turbo run typecheck",
+    "db:migrate": "npm run migrate -w database",
+    "db:seed": "npm run seed -w database",
+    "db:generate": "npm run generate -w database",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

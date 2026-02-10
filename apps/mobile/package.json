@@ -1,0 +1,16 @@
+{
+  "name": "@emunah/mobile",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Emunah Companion – React Native + Expo mobile app",
+  "scripts": {
+    "dev": "echo \"Run 'npx expo start' after Expo initialization\" && exit 0",
+    "build": "echo \"Expo build via EAS\" && exit 0",
+    "lint": "echo \"No lint yet\" && exit 0",
+    "test": "echo \"No tests yet\" && exit 0",
+    "typecheck": "echo \"No typecheck yet\" && exit 0"
+  },
+  "dependencies": {
+    "@emunah/shared": "*"
+  }
+}

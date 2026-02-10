@@ -1,0 +1,54 @@
+{
+  "buckets": [
+    {
+      "name": "emunah-companion-media",
+      "location": "ME-WEST1",
+      "storageClass": "STANDARD",
+      "uniformBucketLevelAccess": true,
+      "cors": [
+        {
+          "origin": ["http://localhost:3000", "http://localhost:4000"],
+          "method": ["GET"],
+          "responseHeader": ["Content-Type"],
+          "maxAgeSeconds": 3600
+        }
+      ],
+      "lifecycle": {
+        "rule": [
+          {
+            "action": { "type": "Delete" },
+            "condition": { "age": 365, "matchesPrefix": ["exports/"] }
+          }
+        ]
+      }
+    },
+    {
+      "name": "emunah-companion-exports",
+      "location": "ME-WEST1",
+      "storageClass": "STANDARD",
+      "uniformBucketLevelAccess": true,
+      "lifecycle": {
+        "rule": [
+          {
+            "action": { "type": "Delete" },
+            "condition": { "age": 30 }
+          }
+        ]
+      }
+    },
+    {
+      "name": "emunah-companion-backups",
+      "location": "ME-WEST1",
+      "storageClass": "NEARLINE",
+      "uniformBucketLevelAccess": true,
+      "lifecycle": {
+        "rule": [
+          {
+            "action": { "type": "Delete" },
+            "condition": { "age": 90 }
+          }
+        ]
+      }
+    }
+  ]
+}

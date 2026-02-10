@@ -1,0 +1,16 @@
+{
+  "name": "@emunah/admin",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Emunah Companion – Next.js admin panel / CMS",
+  "scripts": {
+    "dev": "echo \"Run 'npx create-next-app' after Next.js initialization\" && exit 0",
+    "build": "echo \"Next.js build\" && exit 0",
+    "lint": "echo \"No lint yet\" && exit 0",
+    "test": "echo \"No tests yet\" && exit 0",
+    "typecheck": "echo \"No typecheck yet\" && exit 0"
+  },
+  "dependencies": {
+    "@emunah/shared": "*"
+  }
+}
