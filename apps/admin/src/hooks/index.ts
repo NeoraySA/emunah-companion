@@ -5,3 +5,4 @@ export {
   useUpdateScenario,
   useDeleteScenario,
 } from './use-scenarios';
+export { useAuth, AuthProvider } from './use-auth';

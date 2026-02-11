@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LayoutDashboard, BookOpen, Home, Languages, Image, Users, Settings } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 const navItems = [
   { name: 'לוח בקרה', href: '/dashboard', icon: LayoutDashboard },
@@ -11,12 +12,17 @@ const navItems = [
   { name: 'כפתורי בית', href: '/dashboard/home-buttons', icon: Home },
   { name: 'תרגומים', href: '/dashboard/translations', icon: Languages },
   { name: 'מדיה', href: '/dashboard/media', icon: Image },
-  { name: 'משתמשים', href: '/dashboard/users', icon: Users },
-  { name: 'הגדרות', href: '/dashboard/settings', icon: Settings },
+  { name: 'משתמשים', href: '/dashboard/users', icon: Users, adminOnly: true },
+  { name: 'הגדרות', href: '/dashboard/settings', icon: Settings, adminOnly: true },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const visibleItems = navItems.filter(
+    (item) => !('adminOnly' in item && item.adminOnly) || user?.role === 'admin',
+  );
 
   return (
     <aside className="w-64 border-l bg-card hidden lg:block">
@@ -27,7 +33,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="p-4 space-y-1">
-        {navItems.map((item) => {
+        {visibleItems.map((item) => {
           const isActive =
             pathname === item.href ||
             (item.href !== '/dashboard' && pathname?.startsWith(item.href));
