@@ -1,11 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../utils/errors';
 
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction) {
-  console.error('[error]', err.message);
+  // Known application errors
+  if (err instanceof AppError) {
+    res.status(err.statusCode).json({
+      success: false,
+      error: {
+        code: err.code,
+        message: err.message,
+        ...(err.details ? { details: err.details } : {}),
+      },
+    });
+    return;
+  }
 
-  const statusCode = 'statusCode' in err ? (err as { statusCode: number }).statusCode : 500;
+  // Unknown errors
+  console.error('[error]', err.message, err.stack);
 
-  res.status(statusCode).json({
+  res.status(500).json({
     success: false,
     error: {
       code: 'INTERNAL_ERROR',
