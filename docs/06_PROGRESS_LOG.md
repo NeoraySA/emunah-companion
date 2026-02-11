@@ -206,4 +206,32 @@
 
 ---
 
+### 2026-02-11 – Mobile Auth Screens
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Implemented full authentication flow in the Expo mobile app. Created Login and Register screens with Hebrew RTL UI, auth service layer with SecureStore token management, updated Zustand store with login/register/initialize actions, protected routing via useProtectedRoute hook, and a full Settings screen with user info and logout.
+- **Architecture**:
+  - **Token storage**: expo-secure-store (encrypted on device)
+  - **Auth flow**: App launch → initialize (check token + /auth/me) → route to (auth) or (tabs)
+  - **Route protection**: `useProtectedRoute` hook in root layout – redirects based on auth state
+  - **API client**: Axios interceptors use auth-service helpers; clears auth store on refresh failure
+  - **State**: Zustand store with login/register/logout/initialize actions
+- **Files created**:
+  - `services/auth-service.ts` – login/register/logout/refresh/me API + token helpers
+  - `app/(auth)/_layout.tsx` – Auth route group layout
+  - `app/(auth)/login.tsx` – Login screen (email + password, Hebrew UI)
+  - `app/(auth)/register.tsx` – Register screen (name + email + password + confirm, Hebrew UI)
+- **Files modified**:
+  - `store/auth-store.ts` – Added login/register/initialize actions, uses auth-service
+  - `hooks/use-auth.ts` – Simplified as convenience wrapper around store
+  - `services/api-client.ts` – Uses auth-service helpers, clears auth state on failed refresh
+  - `services/index.ts` – Added auth-service exports
+  - `app/_layout.tsx` – Auth-based routing with useProtectedRoute + initialize on mount
+  - `app/(tabs)/settings.tsx` – Full Settings screen with user card, settings rows, logout with Alert
+- **Verification**: TypeScript compiles with zero errors
+- **Open items**: End-to-end auth testing, forgot password flow
+
+---
+
 _Will be populated as tasks are planned and approved._
