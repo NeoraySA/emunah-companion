@@ -113,4 +113,32 @@
 
 ---
 
+### 2026-02-10 – Next.js Admin Panel Initialization
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Initialized Next.js 15.2 admin panel with App Router and React 19. Created dashboard layout with RTL Hebrew support, sidebar navigation, and 7 page stubs. Set up shadcn/ui style components, React Query hooks, and API client with JWT interceptors.
+- **Tech choices**:
+  - Next.js 15.2 (App Router)
+  - React 19
+  - Tailwind CSS 3.4 + shadcn/ui style components
+  - @tanstack/react-query v5 (data fetching)
+  - React Hook Form + Zod (form validation)
+  - Axios (API client)
+  - TypeScript strict mode with path aliases
+- **Files created**:
+  - Config: `next.config.js`, `package.json`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.js`, `.env.example`, `.gitignore`
+  - Layouts: `src/app/layout.tsx`, `src/app/(dashboard)/layout.tsx`
+  - Pages: `src/app/page.tsx`, `src/app/(dashboard)/dashboard/page.tsx`, `scenarios/`, `home-buttons/`, `translations/`, `media/`, `users/`, `settings/`
+  - Components: `src/components/ui/button.tsx`, `card.tsx`, `index.ts`
+  - Layout: `src/components/layout/sidebar.tsx`, `header.tsx`, `index.ts`
+  - Services: `src/services/api-client.ts`, `index.ts`
+  - Hooks: `src/hooks/use-scenarios.ts`, `index.ts`
+  - Utils: `src/lib/utils.ts`
+  - Providers: `src/app/providers.tsx`, `globals.css`
+- **Verification**: TypeScript compiles with zero errors, Next.js build succeeds
+- **Open items**: Implement Auth feature, build out dashboard pages
+
+---
+
 _Will be populated as tasks are planned and approved._
