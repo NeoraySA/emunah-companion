@@ -176,4 +176,34 @@
 
 ---
 
+### 2026-02-11 – Admin Auth Integration
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Integrated authentication into the Next.js admin panel. Created a login page with email/password form (Hebrew UI), AuthProvider context, token management with localStorage + cookie flag for Edge middleware, AuthGuard for dashboard protection, updated Header with user info and logout, Sidebar with RBAC-filtered navigation.
+- **Architecture**:
+  - **Token storage**: localStorage (access + refresh tokens) + lightweight cookie (`emunah_auth`) for Next.js Edge middleware
+  - **Auth flow**: Login → store tokens → redirect to /dashboard; Logout → clear tokens → redirect to /login
+  - **Route protection**: 2 layers – Next.js Edge middleware (cookie check) + client-side AuthGuard (JWT verification via /auth/me)
+  - **RBAC**: Only admin/editor can access CMS; Sidebar hides Users/Settings for non-admin
+- **Files created**:
+  - `src/services/auth-service.ts` – Login/logout/refresh/me API + token management
+  - `src/hooks/use-auth.tsx` – AuthProvider + useAuth hook
+  - `src/components/auth-guard.tsx` – Client-side auth guard
+  - `src/middleware.ts` – Next.js Edge middleware
+  - `src/app/login/page.tsx` – Login page with form
+  - `src/components/ui/input.tsx` – Input component (shadcn/ui)
+  - `src/components/ui/label.tsx` – Label component (shadcn/ui)
+- **Files modified**:
+  - `src/app/providers.tsx` – Added AuthProvider
+  - `src/app/(dashboard)/layout.tsx` – Wrapped with AuthGuard
+  - `src/app/page.tsx` – Smart redirect based on auth state
+  - `src/components/layout/header.tsx` – User name, role badge, logout
+  - `src/components/layout/sidebar.tsx` – RBAC-filtered nav items
+  - Barrel exports: `ui/index.ts`, `services/index.ts`, `hooks/index.ts`
+- **Verification**: TypeScript compiles with zero errors, Next.js build succeeds (12 pages + middleware)
+- **Open items**: Mobile login/register screens, end-to-end auth testing
+
+---
+
 _Will be populated as tasks are planned and approved._
