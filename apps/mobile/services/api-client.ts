@@ -1,6 +1,7 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import { API_BASE_URL, STORAGE_KEYS } from '@constants/config';
+import { API_BASE_URL } from '@constants/config';
+import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from './auth-service';
+import { useAuthStore } from '@store/auth-store';
 
 /**
  * Pre-configured Axios instance for API calls.
@@ -17,7 +18,7 @@ const apiClient = axios.create({
 // Request interceptor – attach access token
 apiClient.interceptors.request.use(
   async (config) => {
-    const token = await SecureStore.getItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
+    const token = await getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,7 +38,7 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = await SecureStore.getItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
+        const refreshToken = await getRefreshToken();
         if (!refreshToken) {
           throw new Error('No refresh token');
         }
@@ -46,16 +47,17 @@ apiClient.interceptors.response.use(
           refreshToken,
         });
 
-        await SecureStore.setItemAsync(STORAGE_KEYS.ACCESS_TOKEN, data.data.accessToken);
-        await SecureStore.setItemAsync(STORAGE_KEYS.REFRESH_TOKEN, data.data.refreshToken);
+        await saveTokens({
+          accessToken: data.data.accessToken,
+          refreshToken: data.data.refreshToken,
+        });
 
         originalRequest.headers.Authorization = `Bearer ${data.data.accessToken}`;
         return apiClient(originalRequest);
       } catch {
-        // Refresh failed – clear tokens, user needs to re-login
-        await SecureStore.deleteItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
-        await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
-        // TODO: Navigate to login screen
+        // Refresh failed – clear tokens, reset auth state → triggers redirect to login
+        await clearTokens();
+        useAuthStore.getState().clearUser();
       }
     }
 

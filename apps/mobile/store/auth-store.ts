@@ -1,6 +1,16 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
-import { STORAGE_KEYS } from '@constants/config';
+import {
+  loginApi,
+  registerApi,
+  logoutApi,
+  getMeApi,
+  clearTokens,
+  getAccessToken,
+} from '@services/auth-service';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 export interface AuthUser {
   id: number;
@@ -14,11 +24,18 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
 
+  // Actions
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, fullName: string) => Promise<void>;
+  logout: () => Promise<void>;
+  initialize: () => Promise<void>;
   setUser: (user: AuthUser) => void;
   clearUser: () => void;
-  setLoading: (loading: boolean) => void;
-  logout: () => Promise<void>;
 }
+
+// ---------------------------------------------------------------------------
+// Store
+// ---------------------------------------------------------------------------
 
 /**
  * Auth store – manages authentication state.
@@ -29,15 +46,36 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   isLoading: true,
 
-  setUser: (user) => set({ user, isAuthenticated: true, isLoading: false }),
+  login: async (email, password) => {
+    const result = await loginApi({ email, password });
+    set({ user: result.user, isAuthenticated: true, isLoading: false });
+  },
 
-  clearUser: () => set({ user: null, isAuthenticated: false, isLoading: false }),
-
-  setLoading: (isLoading) => set({ isLoading }),
+  register: async (email, password, fullName) => {
+    const result = await registerApi({ email, password, fullName });
+    set({ user: result.user, isAuthenticated: true, isLoading: false });
+  },
 
   logout: async () => {
-    await SecureStore.deleteItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
-    await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
+    await logoutApi();
     set({ user: null, isAuthenticated: false, isLoading: false });
   },
+
+  initialize: async () => {
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        set({ user: null, isAuthenticated: false, isLoading: false });
+        return;
+      }
+      const profile = await getMeApi();
+      set({ user: profile, isAuthenticated: true, isLoading: false });
+    } catch {
+      await clearTokens();
+      set({ user: null, isAuthenticated: false, isLoading: false });
+    }
+  },
+
+  setUser: (user) => set({ user, isAuthenticated: true, isLoading: false }),
+  clearUser: () => set({ user: null, isAuthenticated: false, isLoading: false }),
 }));
