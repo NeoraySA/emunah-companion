@@ -141,4 +141,39 @@
 
 ---
 
+### 2026-02-11 – Server Auth System (JWT)
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Implemented full JWT authentication system in the Express server. Includes register, login, refresh, logout, change-password, and profile endpoints. Auth middleware with RBAC support for role-based access control (`admin`, `editor`, `user`). Zod validation for all inputs. Prisma client integration.
+- **Architecture**:
+  - **JWT strategy**: Access token (15m, signed) + Refresh token (7d, opaque random, stored in DB with rotation)
+  - **Password**: bcrypt with 12 salt rounds
+  - **RBAC**: `authenticate` middleware → `authorize('admin', 'editor')` middleware
+  - **Validation**: Zod schemas → `validate()` middleware
+  - **Error handling**: `AppError` hierarchy → central `errorHandler`
+- **Routes**:
+  - `POST /api/v1/auth/register` – Register new user (public)
+  - `POST /api/v1/auth/login` – Login, returns JWT tokens (public)
+  - `POST /api/v1/auth/refresh` – Refresh access token (public)
+  - `POST /api/v1/auth/logout` – Invalidate refresh token (authenticated)
+  - `POST /api/v1/auth/change-password` – Change password (authenticated)
+  - `GET /api/v1/auth/me` – Get user profile (authenticated)
+- **Files created**:
+  - Utils: `utils/errors.ts`, `utils/prisma.ts`, `utils/jwt.ts`, `utils/password.ts`, `utils/index.ts`
+  - Middleware: `middleware/auth.middleware.ts`, `middleware/validate.middleware.ts`
+  - Validators: `validators/auth.validator.ts`
+  - Service: `services/auth.service.ts`
+  - Controller: `controllers/auth.controller.ts`
+  - Routes: `routes/auth.routes.ts`
+  - Types: `types/express.d.ts`
+- **Files modified**:
+  - `routes/index.ts` – wired auth routes
+  - `middleware/error-handler.middleware.ts` – AppError support
+  - `package.json` – added @prisma/client
+- **Tests**: 43 tests passing (6 suites: JWT, password, errors, validators, auth middleware, health)
+- **Open items**: Admin login page, Mobile login screen, Integration tests with DB
+
+---
+
 _Will be populated as tasks are planned and approved._
