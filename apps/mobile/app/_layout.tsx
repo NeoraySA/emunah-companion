@@ -66,6 +66,14 @@ function AppContent() {
       >
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="scenario/[id]"
+          options={{
+            headerShown: true,
+            headerBackTitle: 'חזרה',
+            presentation: 'card',
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </>

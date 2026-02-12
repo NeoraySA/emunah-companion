@@ -1,45 +1,119 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { COLORS } from '@constants/config';
+import { useHomeButtons } from '@hooks/use-home-buttons';
+import { useAuth } from '@hooks/use-auth';
+import { EmptyState } from '@components/EmptyState';
+
+// Map icon string from API to Ionicons name
+const ICON_MAP: Record<string, keyof typeof Ionicons.glyphMap> = {
+  book: 'book-outline',
+  journal: 'journal-outline',
+  heart: 'heart-outline',
+  settings: 'settings-outline',
+  star: 'star-outline',
+  compass: 'compass-outline',
+  bulb: 'bulb-outline',
+  people: 'people-outline',
+};
+
+const COLOR_MAP: Record<string, string> = {
+  blue: '#3b82f6',
+  green: '#10b981',
+  amber: '#f59e0b',
+  indigo: '#6366f1',
+  rose: '#f43f5e',
+  teal: '#14b8a6',
+};
+
+function resolveIcon(raw: string): keyof typeof Ionicons.glyphMap {
+  return ICON_MAP[raw] ?? (raw as keyof typeof Ionicons.glyphMap) ?? 'ellipse-outline';
+}
+
+function resolveColor(raw: string): string {
+  return COLOR_MAP[raw] ?? raw ?? COLORS.secondary;
+}
 
 /**
  * Home Screen – displays the main action buttons configured via CMS.
- * Placeholder implementation until HomeButton API is connected.
  */
 export default function HomeScreen() {
-  // Placeholder buttons – will be replaced with data from API
-  const buttons = [
-    { id: '1', title: 'תרחישי אמונה', icon: 'book-outline' as const, color: '#3b82f6' },
-    { id: '2', title: 'יומן אישי', icon: 'journal-outline' as const, color: '#10b981' },
-    { id: '3', title: 'עוגני אמונה', icon: 'heart-outline' as const, color: '#f59e0b' },
-    { id: '4', title: 'הגדרות', icon: 'settings-outline' as const, color: '#6366f1' },
-  ];
+  const { user } = useAuth();
+  const { data: buttons, isLoading, isError, refetch } = useHomeButtons();
+  const router = useRouter();
+
+  function handlePress(route: string) {
+    // Routes from API like "scenarios", "journal", "anchors", "settings"
+    if (route.startsWith('/')) {
+      router.push(route as never);
+    } else {
+      router.navigate(`/(tabs)/${route}` as never);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={false} onRefresh={refetch} />}
+      >
         {/* Hero Section */}
         <View style={styles.hero}>
-          <Text style={styles.heroTitle}>שלום וברכה!</Text>
+          <Text style={styles.heroTitle}>שלום{user?.fullName ? ` ${user.fullName}` : ''}!</Text>
           <Text style={styles.heroSubtitle}>חזק את האמונה שלך יום אחרי יום</Text>
         </View>
 
         {/* Action Buttons Grid */}
-        <View style={styles.grid}>
-          {buttons.map((button) => (
-            <Pressable
-              key={button.id}
-              style={styles.card}
-              accessibilityLabel={button.title}
-              accessibilityRole="button"
-            >
-              <View style={[styles.iconContainer, { backgroundColor: button.color + '20' }]}>
-                <Ionicons name={button.icon} size={32} color={button.color} />
-              </View>
-              <Text style={styles.cardTitle}>{button.title}</Text>
-            </Pressable>
-          ))}
-        </View>
+        {isLoading ? (
+          <ActivityIndicator size="large" color={COLORS.secondary} style={{ marginTop: 32 }} />
+        ) : isError || !buttons?.length ? (
+          <EmptyState
+            icon="grid-outline"
+            title="אין כפתורים זמינים"
+            subtitle="עדכן את התוכן דרך לוח הניהול"
+          />
+        ) : (
+          <View style={styles.grid}>
+            {buttons.map((button) => (
+              <Pressable
+                key={button.id}
+                style={styles.card}
+                accessibilityLabel={button.label ?? button.key}
+                accessibilityRole="button"
+                onPress={() => handlePress(button.route)}
+              >
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: resolveColor(button.icon.split(':')[1] ?? 'blue') + '20' },
+                  ]}
+                >
+                  <Ionicons
+                    name={resolveIcon(button.icon.split(':')[0] ?? button.icon)}
+                    size={32}
+                    color={resolveColor(button.icon.split(':')[1] ?? 'blue')}
+                  />
+                </View>
+                <Text style={styles.cardTitle}>{button.label ?? button.key}</Text>
+                {button.description ? (
+                  <Text style={styles.cardDesc} numberOfLines={2}>
+                    {button.description}
+                  </Text>
+                ) : null}
+              </Pressable>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -48,10 +122,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: COLORS.background,
   },
   scrollContent: {
     padding: 20,
+    paddingBottom: 40,
   },
   hero: {
     alignItems: 'center',
@@ -61,13 +136,13 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1a365d',
+    color: COLORS.primary,
     marginBottom: 8,
     writingDirection: 'rtl',
   },
   heroSubtitle: {
     fontSize: 16,
-    color: '#64748b',
+    color: COLORS.textSecondary,
     textAlign: 'center',
     writingDirection: 'rtl',
   },
@@ -79,7 +154,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '47%',
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -100,7 +175,15 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1e293b',
+    color: COLORS.textPrimary,
+    textAlign: 'center',
     writingDirection: 'rtl',
+  },
+  cardDesc: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    writingDirection: 'rtl',
+    marginTop: 4,
   },
 });

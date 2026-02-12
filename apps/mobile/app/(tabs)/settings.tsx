@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,19 +7,65 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  TextInput,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@constants/config';
 import { useAuth } from '@hooks/use-auth';
+import { useProfile, useUpdateProfile } from '@hooks/use-profile';
+
+const LANGUAGE_OPTIONS = [
+  { code: 'he', label: 'עברית' },
+  { code: 'en', label: 'English' },
+];
 
 /**
- * Settings Screen – user info, preferences, logout.
+ * Settings Screen – user info, preferences, profile editing, logout.
  */
 export default function SettingsScreen() {
   const { user, logout } = useAuth();
-  const [loggingOut, setLoggingOut] = useState(false);
+  const { data: profile } = useProfile();
+  const updateProfile = useUpdateProfile();
 
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editName, setEditName] = useState('');
+
+  const currentLang = profile?.preferredLang ?? 'he';
+  const displayName = profile?.displayName ?? user?.fullName ?? 'משתמש';
+
+  // -- Edit display name --
+  const openEditName = useCallback(() => {
+    setEditName(displayName);
+    setEditModalVisible(true);
+  }, [displayName]);
+
+  const saveName = useCallback(async () => {
+    if (!editName.trim()) return;
+    try {
+      await updateProfile.mutateAsync({ displayName: editName.trim() });
+      setEditModalVisible(false);
+    } catch {
+      Alert.alert('שגיאה', 'לא ניתן לעדכן את השם');
+    }
+  }, [editName, updateProfile]);
+
+  // -- Change language --
+  const handleChangeLanguage = useCallback(() => {
+    const nextLang = currentLang === 'he' ? 'en' : 'he';
+    const nextLabel = LANGUAGE_OPTIONS.find((l) => l.code === nextLang)?.label ?? nextLang;
+    Alert.alert('שינוי שפה', `לשנות ל-${nextLabel}?`, [
+      { text: 'ביטול', style: 'cancel' },
+      {
+        text: 'שנה',
+        onPress: () => updateProfile.mutate({ preferredLang: nextLang }),
+      },
+    ]);
+  }, [currentLang, updateProfile]);
+
+  // -- Logout --
   function handleLogout() {
     Alert.alert('התנתקות', 'האם אתה בטוח שברצונך להתנתק?', [
       { text: 'ביטול', style: 'cancel' },
@@ -38,21 +84,27 @@ export default function SettingsScreen() {
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* User Card */}
-        <View style={styles.userCard}>
+        <Pressable style={styles.userCard} onPress={openEditName} accessibilityRole="button">
           <View style={styles.avatar}>
             <Ionicons name="person" size={32} color={COLORS.primary} />
           </View>
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{user?.fullName ?? 'משתמש'}</Text>
-            <Text style={styles.userEmail}>{user?.email ?? ''}</Text>
+            <Text style={styles.userName}>{displayName}</Text>
+            <Text style={styles.userEmail}>{profile?.email ?? user?.email ?? ''}</Text>
           </View>
-        </View>
+          <Ionicons name="create-outline" size={20} color={COLORS.textMuted} />
+        </Pressable>
 
         {/* Settings sections */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>כללי</Text>
 
-          <SettingsRow icon="language-outline" label="שפה" value="עברית" />
+          <SettingsRow
+            icon="language-outline"
+            label="שפה"
+            value={LANGUAGE_OPTIONS.find((l) => l.code === currentLang)?.label ?? currentLang}
+            onPress={handleChangeLanguage}
+          />
           <SettingsRow icon="notifications-outline" label="התראות" value="פעיל" />
           <SettingsRow icon="moon-outline" label="מצב לילה" value="כבוי" />
         </View>
@@ -83,6 +135,36 @@ export default function SettingsScreen() {
           )}
         </Pressable>
       </ScrollView>
+
+      {/* Edit Name Modal */}
+      <Modal visible={editModalVisible} transparent animationType="fade">
+        <Pressable style={styles.overlay} onPress={() => setEditModalVisible(false)}>
+          <Pressable style={styles.dialog} onPress={(e) => e.stopPropagation()}>
+            <Text style={styles.dialogTitle}>עריכת שם</Text>
+            <TextInput
+              style={styles.dialogInput}
+              value={editName}
+              onChangeText={setEditName}
+              textAlign="right"
+              autoFocus
+              placeholder="הכנס שם"
+              placeholderTextColor={COLORS.textMuted}
+            />
+            <View style={styles.dialogButtons}>
+              <Pressable style={styles.dialogBtn} onPress={() => setEditModalVisible(false)}>
+                <Text style={styles.dialogBtnCancel}>ביטול</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.dialogBtn, styles.dialogBtnPrimary]}
+                onPress={saveName}
+                disabled={!editName.trim() || updateProfile.isPending}
+              >
+                <Text style={styles.dialogBtnSave}>{updateProfile.isPending ? '...' : 'שמור'}</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -95,13 +177,15 @@ function SettingsRow({
   icon,
   label,
   value,
+  onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value?: string;
+  onPress?: () => void;
 }) {
   return (
-    <Pressable style={styles.row} accessibilityRole="button">
+    <Pressable style={styles.row} onPress={onPress} accessibilityRole="button">
       <View style={styles.rowLeft}>
         <Ionicons name={icon} size={22} color={COLORS.textSecondary} />
         <Text style={styles.rowLabel}>{label}</Text>
@@ -219,4 +303,52 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     writingDirection: 'rtl',
   },
+
+  // Modal overlay + dialog
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  dialog: {
+    width: '100%',
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 24,
+  },
+  dialogTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    textAlign: 'right',
+    writingDirection: 'rtl',
+    marginBottom: 16,
+  },
+  dialogInput: {
+    fontSize: 16,
+    color: COLORS.textPrimary,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    writingDirection: 'rtl',
+    marginBottom: 20,
+  },
+  dialogButtons: {
+    flexDirection: 'row-reverse',
+    gap: 12,
+  },
+  dialogBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: COLORS.border,
+  },
+  dialogBtnPrimary: { backgroundColor: COLORS.secondary },
+  dialogBtnCancel: { fontSize: 15, fontWeight: '600', color: COLORS.textSecondary },
+  dialogBtnSave: { fontSize: 15, fontWeight: '600', color: '#fff' },
 });
