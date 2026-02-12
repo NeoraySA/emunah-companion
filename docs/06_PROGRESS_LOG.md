@@ -379,4 +379,34 @@
 
 ---
 
+### 2026-02-12 – Step 13: Mobile App Content Screens
+
+- **Branch**: `develop`
+- **Commit**: `0e19dc6`
+- **Status**: ✅ Done
+- **Summary**: Replaced all 5 placeholder mobile tab screens with fully functional, API-connected screens. Created React Query hooks for all data fetching/mutation, a reusable EmptyState component, and a dedicated scenario step-by-step flow screen.
+- **Technical highlights**:
+  - **React Query hooks** (5 new files): home-buttons, scenarios (list + single), journal (CRUD), anchors (CRUD), profile (read + update)
+  - **EmptyState component**: Reusable with icon/emoji, title, subtitle, optional action button
+  - **Home tab**: Dynamic buttons from `/home-buttons` API, personalized greeting with user name, pull-to-refresh, icon/color mapping
+  - **Scenarios tab**: Fetches list from `/scenarios` API, category color dots, navigates to flow screen
+  - **Scenario flow screen** (`/scenario/[id]`): Step-by-step walkthrough with progress bar, step type icons (text/prompt/action/summary), prev/next/finish navigation
+  - **Journal tab**: Full CRUD with modal editor, mood emoji selector, date formatting (he-IL locale), delete confirmation, FAB for new entry
+  - **Anchors tab**: Full CRUD with schedule type selector (once/daily/weekly/custom), active toggle, delete confirmation, FAB
+  - **Settings tab**: Profile editing via API (display name modal, language toggle with confirmation), syncs auth store on update
+  - **Root layout**: Added `scenario/[id]` as stack screen above tabs
+  - **All RTL**: writingDirection, row-reverse, text-align right throughout
+- **React Query hooks created**:
+  - `hooks/use-home-buttons.ts` – useHomeButtons
+  - `hooks/use-scenarios.ts` – useScenarios, useScenario
+  - `hooks/use-journal.ts` – useJournalEntries, useJournalEntry, useCreateJournalEntry, useUpdateJournalEntry, useDeleteJournalEntry
+  - `hooks/use-anchors.ts` – useAnchors, useCreateAnchor, useUpdateAnchor, useDeleteAnchor
+  - `hooks/use-profile.ts` – useProfile, useUpdateProfile
+- **Files created**: 7 new files
+- **Files modified**: 8 existing files (5 tab screens, root layout, hooks barrel, components barrel)
+- **Verification**: TypeScript compiles with zero errors
+- **Open items**: Admin Users page, E2E testing, deploy prep
+
+---
+
 _Will be populated as tasks are planned and approved._
