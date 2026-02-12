@@ -7,6 +7,8 @@ import { translationRouter } from './translation.routes';
 import { scenarioRouter } from './scenario.routes';
 import { journalRouter } from './journal.routes';
 import { anchorRouter } from './anchor.routes';
+import { mediaRouter } from './media.routes';
+import { userRouter } from './user.routes';
 
 const router = Router();
 
@@ -26,8 +28,8 @@ router.use('/scenarios', scenarioRouter);
 router.use('/journal', journalRouter);
 router.use('/anchors', anchorRouter);
 
-// Future routes will be added here:
-// router.use('/media', mediaRouter);
-// router.use('/users', userRouter);
+// Media & Users
+router.use('/media', mediaRouter);
+router.use('/users', userRouter);
 
 export { router };

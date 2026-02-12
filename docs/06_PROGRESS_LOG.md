@@ -272,4 +272,38 @@
 
 ---
 
+### 2026-02-12 – Journal API (Encrypted) + Anchors API
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Implemented Journal and Anchors APIs. Journal entries use AES-256-CBC encryption at the application level (title + body encrypted, per-entry IV). Anchors support schedule types (once, daily, weekly, custom). Both APIs are user-scoped with pagination and soft-delete.
+- **Architecture**:
+  - **Journal encryption**: AES-256-CBC with random 16-byte IV per entry. Key from `JOURNAL_ENCRYPTION_KEY` env (64-char hex). Title and body encrypted with same IV, stored as `Bytes` in MySQL.
+  - **User-scoping**: Both Journal and Anchors filter by `userId` from JWT token — users can only access their own data.
+  - **Anchor schedules**: `scheduleType` enum (once/daily/weekly/custom) + `scheduleConfig` JSON for cron/time details. Uses `Prisma.JsonNull` for nullable JSON.
+- **Routes**:
+  - `GET /api/v1/journal` – List entries (paginated, filter by scenarioId/mood)
+  - `GET /api/v1/journal/:id` – Get single entry (decrypted)
+  - `POST /api/v1/journal` – Create entry (encrypted)
+  - `PUT /api/v1/journal/:id` – Update entry (re-encrypted)
+  - `DELETE /api/v1/journal/:id` – Soft-delete entry
+  - `GET /api/v1/anchors` – List anchors (paginated)
+  - `POST /api/v1/anchors` – Create anchor
+  - `PUT /api/v1/anchors/:id` – Update anchor
+  - `DELETE /api/v1/anchors/:id` – Soft-delete anchor
+- **Files created**:
+  - Utils: `utils/encryption.ts` (AES-256-CBC encrypt/decrypt)
+  - Validators: `validators/journal.validator.ts`, `validators/anchor.validator.ts`
+  - Services: `services/journal.service.ts`, `services/anchor.service.ts`
+  - Controllers: `controllers/journal.controller.ts`, `controllers/anchor.controller.ts`
+  - Routes: `routes/journal.routes.ts`, `routes/anchor.routes.ts`
+  - Tests: `tests/utils/encryption.test.ts`, `tests/validators/journal.validator.test.ts`, `tests/validators/anchor.validator.test.ts`
+- **Files modified**:
+  - `routes/index.ts` – Wired journal + anchor routers
+  - `utils/index.ts` – Added encryption exports
+- **Tests**: 130 total (35 new: 10 encryption + 13 journal validators + 12 anchor validators)
+- **Open items**: Media API, Users API
+
+---
+
 _Will be populated as tasks are planned and approved._
