@@ -5,6 +5,8 @@ import { languageRouter } from './language.routes';
 import { homeButtonRouter } from './home-button.routes';
 import { translationRouter } from './translation.routes';
 import { scenarioRouter } from './scenario.routes';
+import { journalRouter } from './journal.routes';
+import { anchorRouter } from './anchor.routes';
 
 const router = Router();
 
@@ -20,9 +22,11 @@ router.use('/home-buttons', homeButtonRouter);
 router.use('/translations', translationRouter);
 router.use('/scenarios', scenarioRouter);
 
+// User resources
+router.use('/journal', journalRouter);
+router.use('/anchors', anchorRouter);
+
 // Future routes will be added here:
-// router.use('/journal', journalRouter);
-// router.use('/anchors', anchorRouter);
 // router.use('/media', mediaRouter);
 // router.use('/users', userRouter);
 

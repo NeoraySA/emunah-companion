@@ -234,4 +234,42 @@
 
 ---
 
+### 2026-02-12 – Server CRUD APIs – Core Entities
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Implemented full CRUD API endpoints for all core content entities: Languages, Home Buttons, Translations, and Scenarios + Steps. Added reusable pagination/sorting helpers, Zod validators, service layer with Prisma, controllers, and route wiring. All endpoints follow RESTful conventions with proper RBAC (public/authenticated/admin).
+- **Architecture**:
+  - **Pagination**: Reusable `parsePagination`, `parseSort`, `buildPaginationMeta` helpers (defaults: page=1, limit=20, max=100)
+  - **Soft-delete**: Home Buttons, Scenarios, Steps use `deletedAt` field
+  - **Translations**: Bulk upsert via `$transaction` on composite unique [entityType, entityId, languageId, fieldName]
+  - **Nested resources**: Scenario Steps nested under `/scenarios/:scenarioId/steps`
+  - **Prisma JSON**: `Prisma.JsonNull` sentinel for nullable JSON fields, `InputJsonValue` cast for configJson
+- **Routes**:
+  - `GET /api/v1/languages` – List active languages (public)
+  - `GET /api/v1/home-buttons` – List active buttons (public)
+  - `GET /api/v1/home-buttons/all` – List all buttons (admin)
+  - `GET/POST/PUT/DELETE /api/v1/home-buttons/:id` – Admin CRUD
+  - `GET /api/v1/translations` – Filter by entityType, entityId, languageId (public)
+  - `PUT /api/v1/translations` – Bulk upsert (admin, max 500)
+  - `GET /api/v1/scenarios` – Paginated list (authenticated)
+  - `GET /api/v1/scenarios/all` – Admin list (admin)
+  - `GET/POST/PUT/DELETE /api/v1/scenarios/:id` – Admin CRUD
+  - `GET/POST /api/v1/scenarios/:scenarioId/steps` – List + create steps
+  - `PUT/DELETE /api/v1/scenarios/:scenarioId/steps/:stepId` – Update + delete steps
+- **Files created**:
+  - Utils: `utils/pagination.ts`
+  - Validators: `validators/common.validator.ts`, `home-button.validator.ts`, `translation.validator.ts`, `scenario.validator.ts`
+  - Services: `services/language.service.ts`, `home-button.service.ts`, `translation.service.ts`, `scenario.service.ts`
+  - Controllers: `controllers/language.controller.ts`, `home-button.controller.ts`, `translation.controller.ts`, `scenario.controller.ts`
+  - Routes: `routes/language.routes.ts`, `home-button.routes.ts`, `translation.routes.ts`, `scenario.routes.ts`
+  - Tests: `tests/utils/pagination.test.ts`, `tests/validators/home-button.validator.test.ts`, `translation.validator.test.ts`, `scenario.validator.test.ts`
+- **Files modified**:
+  - `routes/index.ts` – Wired 4 new routers
+  - `utils/index.ts` – Added pagination exports
+- **Tests**: 95 total (52 new: 12 pagination + 10 home-button + 10 translation + 20 scenario validators)
+- **Open items**: Journal API, Anchors API, Media API, Users API
+
+---
+
 _Will be populated as tasks are planned and approved._

@@ -19,3 +19,4 @@ export {
 } from './jwt';
 export { parsePagination, parseSort, buildPaginationMeta } from './pagination';
 export type { PaginationParams, SortParams, PaginationMeta } from './pagination';
+export { encrypt, decrypt } from './encryption';
