@@ -20,3 +20,4 @@ export { useTranslations, useUpsertTranslations } from './use-translations';
 export { useMedia, useUploadMedia, useMediaUrl, useDeleteMedia } from './use-media';
 export { useLanguages } from './use-languages';
 export { useDashboardStats } from './use-stats';
+export { useUsers, useUpdateUser, useDeleteUser } from './use-users';

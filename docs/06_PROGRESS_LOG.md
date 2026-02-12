@@ -409,4 +409,24 @@
 
 ---
 
+### 2026-02-12 – Step 14: Admin Users Management Page
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Built full admin users management — server-side CRUD endpoints (list/get/update/delete) with Zod validation and RBAC (`authorize('admin')`), shared `AdminUser` type, React Query hooks, and a comprehensive admin UI page with search/filter, role/status badges, pagination, edit dialog, delete confirmation, and quick toggle-active action.
+- **Technical highlights**:
+  - **Server validators** (`user.validator.ts`): `listUsersQuerySchema` with search/role/isActive filters, `adminUpdateUserSchema` with role/isActive/displayName/preferredLang fields
+  - **Server service** (`user.service.ts`): `listUsers` (paginated, filtered, search on email+displayName), `getUserById`, `adminUpdateUser` (role change via Prisma Role lookup), `deleteUser` (soft-delete via `isActive=false`), `formatUser` helper
+  - **Server controller** (`user.controller.ts`): 4 admin handlers — `listUsersHandler`, `getUserHandler`, `adminUpdateUserHandler`, `deleteUserHandler`
+  - **Server routes** (`user.routes.ts`): 4 admin routes with `authorize('admin')` middleware — `GET /`, `GET /:id`, `PUT /:id`, `DELETE /:id`
+  - **Shared types**: `AdminUser` interface extending `UserProfile` with `isActive`, `lastLoginAt`
+  - **Admin hook** (`use-users.ts`): `useUsers` (paginated query), `useUpdateUser`, `useDeleteUser`
+  - **Admin page**: Full CRUD table UI with Hebrew RTL — search bar, role filter Select, 7-column Table (name, email, role badge, status badge, last login, join date, actions), edit dialog (name, role, active toggle), delete confirmation dialog, pagination, quick toggle-active button
+- **Files created**: 1 (`apps/admin/src/hooks/use-users.ts`)
+- **Files modified**: 7 (`user.validator.ts`, `user.service.ts`, `user.controller.ts`, `user.routes.ts`, `packages/shared/src/index.ts`, `apps/admin/src/hooks/index.ts`, `apps/admin/src/app/(dashboard)/dashboard/users/page.tsx`)
+- **Verification**: TypeScript compiles with zero errors (server + admin)
+- **Open items**: E2E testing, deploy prep
+
+---
+
 _Will be populated as tasks are planned and approved._

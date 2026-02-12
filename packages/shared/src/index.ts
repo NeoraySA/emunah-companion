@@ -86,6 +86,12 @@ export interface UserProfile {
   createdAt: string;
 }
 
+/** Extended user object returned by admin endpoints */
+export interface AdminUser extends UserProfile {
+  isActive: boolean;
+  lastLoginAt: string | null;
+}
+
 // ----- Languages -----
 
 export interface Language {
