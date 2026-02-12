@@ -1,40 +1,51 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api-client';
-import type { Scenario } from '@emunah/shared';
+import { apiGet, apiPost, apiPut, apiDelete, apiClient } from '@/services/api-client';
+import type { Scenario, ScenarioStep, ScenarioWithSteps, StepType } from '@emunah/shared';
 
 const QUERY_KEY = 'scenarios';
+const STEPS_QUERY_KEY = 'scenario-steps';
+
+// ---- Scenarios ----
 
 /**
- * Hook for fetching scenarios list.
+ * Fetch all scenarios (admin list – includes inactive).
  */
 export function useScenarios() {
   return useQuery({
     queryKey: [QUERY_KEY],
-    queryFn: () => apiGet<Scenario[]>('/scenarios'),
+    queryFn: async () => {
+      const response = await apiClient.get<{
+        success: true;
+        data: Scenario[];
+        meta: { page: number; limit: number; total: number; totalPages: number };
+      }>('/scenarios/all', { params: { limit: 100 } });
+      return response.data.data;
+    },
   });
 }
 
 /**
- * Hook for fetching a single scenario by ID.
+ * Fetch a single scenario by ID (with steps).
  */
 export function useScenario(id: number) {
   return useQuery({
     queryKey: [QUERY_KEY, id],
-    queryFn: () => apiGet<Scenario>(`/scenarios/${id}`),
+    queryFn: () => apiGet<ScenarioWithSteps>(`/scenarios/${id}`),
     enabled: !!id,
   });
 }
 
 /**
- * Hook for creating a new scenario.
+ * Create a new scenario.
  */
 export function useCreateScenario() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<Scenario>) => apiPost<Scenario>('/scenarios', data),
+    mutationFn: (data: { key: string; category: string; sortOrder?: number; isActive?: boolean }) =>
+      apiPost<Scenario>('/scenarios', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
@@ -42,7 +53,7 @@ export function useCreateScenario() {
 }
 
 /**
- * Hook for updating a scenario.
+ * Update a scenario.
  */
 export function useUpdateScenario() {
   const queryClient = useQueryClient();
@@ -58,7 +69,7 @@ export function useUpdateScenario() {
 }
 
 /**
- * Hook for deleting a scenario.
+ * Delete a scenario.
  */
 export function useDeleteScenario() {
   const queryClient = useQueryClient();
@@ -67,6 +78,84 @@ export function useDeleteScenario() {
     mutationFn: (id: number) => apiDelete(`/scenarios/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+    },
+  });
+}
+
+// ---- Scenario Steps ----
+
+/**
+ * Fetch steps for a scenario.
+ */
+export function useScenarioSteps(scenarioId: number) {
+  return useQuery({
+    queryKey: [STEPS_QUERY_KEY, scenarioId],
+    queryFn: () => apiGet<ScenarioStep[]>(`/scenarios/${scenarioId}/steps`),
+    enabled: !!scenarioId,
+  });
+}
+
+/**
+ * Create a step.
+ */
+export function useCreateStep() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      scenarioId,
+      data,
+    }: {
+      scenarioId: number;
+      data: {
+        stepNumber: number;
+        stepType: StepType;
+        configJson?: Record<string, unknown>;
+        sortOrder?: number;
+      };
+    }) => apiPost<ScenarioStep>(`/scenarios/${scenarioId}/steps`, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [STEPS_QUERY_KEY, variables.scenarioId] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY, variables.scenarioId] });
+    },
+  });
+}
+
+/**
+ * Update a step.
+ */
+export function useUpdateStep() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      scenarioId,
+      stepId,
+      data,
+    }: {
+      scenarioId: number;
+      stepId: number;
+      data: Partial<ScenarioStep>;
+    }) => apiPut<ScenarioStep>(`/scenarios/${scenarioId}/steps/${stepId}`, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [STEPS_QUERY_KEY, variables.scenarioId] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY, variables.scenarioId] });
+    },
+  });
+}
+
+/**
+ * Delete a step.
+ */
+export function useDeleteStep() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ scenarioId, stepId }: { scenarioId: number; stepId: number }) =>
+      apiDelete(`/scenarios/${scenarioId}/steps/${stepId}`),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [STEPS_QUERY_KEY, variables.scenarioId] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY, variables.scenarioId] });
     },
   });
 }

@@ -306,4 +306,77 @@
 
 ---
 
+### 2026-02-12 – Media API (GCS) + Users API (Profile)
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Implemented Media API with GCS upload (multer + @google-cloud/storage) and signed URLs, plus Users API for profile management. All API endpoints from the spec are now implemented.
+- **Architecture**:
+  - **GCS client**: `utils/gcs.ts` – upload, signed URL (v4, configurable expiry), delete operations
+  - **Multer**: Memory storage, 10MB limit, MIME whitelist (images, audio, video, PDF)
+  - **Media paths**: `media/<year>/<month>/<uuid>-<filename>` pattern for organized storage
+  - **Soft-delete**: Media records soft-deleted; GCS objects retained for recovery
+  - **User profile**: Separate from auth – GET/PUT `/users/me` for display name + preferred language
+- **Routes**:
+  - `POST /api/v1/media/upload` – Upload file to GCS (admin, multipart/form-data)
+  - `GET /api/v1/media` – List media assets (admin, paginated, filterable by entity)
+  - `GET /api/v1/media/:id/url` – Get signed URL (authenticated)
+  - `DELETE /api/v1/media/:id` – Soft-delete (admin)
+  - `GET /api/v1/users/me` – Get current user profile (authenticated)
+  - `PUT /api/v1/users/me` – Update display name + preferred language (authenticated)
+- **Files created**:
+  - Utils: `utils/gcs.ts`
+  - Middleware: `middleware/upload.middleware.ts` (multer config)
+  - Validators: `validators/media.validator.ts`, `validators/user.validator.ts`
+  - Services: `services/media.service.ts`, `services/user.service.ts`
+  - Controllers: `controllers/media.controller.ts`, `controllers/user.controller.ts`
+  - Routes: `routes/media.routes.ts`, `routes/user.routes.ts`
+  - Tests: `tests/validators/media.validator.test.ts`, `tests/validators/user.validator.test.ts`
+- **Files modified**:
+  - `routes/index.ts` – Wired media + user routers (all 12 route groups now active)
+- **Tests**: 143 total (13 new: 6 media + 7 user validators)
+- **Open items**: All server APIs complete! Next: Admin panel pages, Mobile app screens
+
+---
+
+### 2026-02-12 – Admin Panel Management Pages (Step 12)
+
+- **Branch**: `develop`
+- **Status**: ✅ Done
+- **Summary**: Built full admin panel management pages replacing all 5 placeholder pages with functional CRUD interfaces. Created 6 new shadcn/ui components, 6 new React Query hooks, and implemented 4 management pages + live dashboard stats.
+- **Architecture**:
+  - **Data fetching**: React Query hooks with optimistic invalidation
+  - **Forms**: Controlled state + Dialog-based create/edit workflows
+  - **CRUD pattern**: Table → Create/Edit Dialog → Delete Confirm Dialog (consistent across all pages)
+  - **Translations**: Entity-based editor with per-language per-field editing grid
+  - **Media**: File upload via FormData + grid display with pagination
+  - **Dashboard**: Parallel API calls for live counts
+- **UI Components created** (shadcn/ui style):
+  - `components/ui/table.tsx` – Table, TableHeader, TableBody, TableRow, TableHead, TableCell
+  - `components/ui/badge.tsx` – Badge with success/warning/destructive variants
+  - `components/ui/dialog.tsx` – Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
+  - `components/ui/select.tsx` – Select with radix-ui dropdown
+  - `components/ui/textarea.tsx` – Multi-line text input
+  - `components/ui/separator.tsx` – Visual separator
+- **React Query Hooks created**:
+  - `hooks/use-home-buttons.ts` – useHomeButtons, useCreateHomeButton, useUpdateHomeButton, useDeleteHomeButton
+  - `hooks/use-translations.ts` – useTranslations, useUpsertTranslations
+  - `hooks/use-media.ts` – useMedia, useUploadMedia, useMediaUrl, useDeleteMedia
+  - `hooks/use-languages.ts` – useLanguages
+  - `hooks/use-stats.ts` – useDashboardStats
+  - `hooks/use-scenarios.ts` – Extended with useScenarioSteps, useCreateStep, useUpdateStep, useDeleteStep
+- **Pages implemented**:
+  - **Dashboard** (`/dashboard`) – Live stats cards (clickable), quick action links
+  - **Scenarios** (`/dashboard/scenarios`) – Full table + create/edit/delete dialogs + steps management sub-dialog
+  - **Home Buttons** (`/dashboard/home-buttons`) – Full table + CRUD dialogs
+  - **Translations** (`/dashboard/translations`) – Entity type/entity selector + per-language per-field editing grid + batch save
+  - **Media** (`/dashboard/media`) – Upload button + media grid + pagination + delete confirm
+- **Files created**: 12 new files
+- **Files modified**: 8 existing files (pages, barrel exports, hooks)
+- **Dependencies added**: radix-ui peer deps (react-id, react-focus-guards, react-remove-scroll, floating-ui, aria-hidden, etc.)
+- **Verification**: TypeScript compiles with zero errors, Next.js build succeeds (12 pages, 1 middleware)
+- **Open items**: Mobile app screens integration, end-to-end testing, Users page CRUD
+
+---
+
 _Will be populated as tasks are planned and approved._
